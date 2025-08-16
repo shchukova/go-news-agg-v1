@@ -1,0 +1,7 @@
+{
+    "max_page_size": 100,
+    "base_url": "https://newsapi.org/v2/top-headlines",
+    "default_rate_limit_delay_seconds": 5,
+    "kafka_broker": "localhost:9092",
+    "kafka_topic": "news_articles"
+  }

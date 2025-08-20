@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"go-news-agg/config"
-	"go-news-agg/newsapi"
+	"go-news-agg/internal/config"
+	"go-news-agg/internal/newsapi"
 )
 
 func main() {
@@ -40,8 +40,8 @@ func main() {
 	}
 
 	// Setup download parameters
-	query := os.Getenv("NEWS_QUERY")        // Optional: specific topic to search for
-	country := getEnvWithDefault("NEWS_COUNTRY", "us") // Default to US news
+	query := os.Getenv("NEWS_QUERY")
+	country := getEnvWithDefault("NEWS_COUNTRY", "us")
 	
 	// Calculate "yesterday" for the news search
 	yesterday := time.Now().AddDate(0, 0, -1)
@@ -82,7 +82,6 @@ func main() {
 	// Display results
 	displayResults(result)
 
-	// Check for any errors that occurred during download
 	if len(result.Errors) > 0 {
 		log.Printf("Download completed with %d errors:", len(result.Errors))
 		for i, err := range result.Errors {
@@ -94,9 +93,7 @@ func main() {
 	fmt.Println("Pipeline finished successfully!")
 }
 
-// loadConfiguration loads the application configuration from file or environment
 func loadConfiguration() (*config.Config, error) {
-	// Try to load from config file first
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath != "" {
 		log.Printf("Loading configuration from file: %s", configPath)
@@ -109,11 +106,9 @@ func loadConfiguration() (*config.Config, error) {
 		}
 	}
 
-	// Fall back to environment variables
 	log.Println("Loading configuration from environment variables...")
 	cfg := config.LoadConfigFromEnv()
 	
-	// Validate the configuration
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
@@ -121,7 +116,6 @@ func loadConfiguration() (*config.Config, error) {
 	return cfg, nil
 }
 
-// displayResults shows a summary of the download results
 func displayResults(result *newsapi.DownloadResult) {
 	fmt.Printf("\n=== Download Summary ===\n")
 	fmt.Printf("Total Articles Found: %d\n", result.TotalArticles)
@@ -143,37 +137,9 @@ func displayResults(result *newsapi.DownloadResult) {
 	}
 }
 
-// getEnvWithDefault returns the value of an environment variable or a default value
 func getEnvWithDefault(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
 	return defaultValue
-}
-
-// Alternative main function for testing with custom config
-func runWithConfig(cfg *config.Config, apiKey string) error {
-	ctx := context.Background()
-
-	// Setup download parameters
-	query := ""
-	country := "us"
-	yesterday := time.Now().AddDate(0, 0, -1)
-	yesterdayStartOfDay := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, yesterday.Location())
-
-	// Create download request
-	req := newsapi.NewDownloadRequest(apiKey, country)
-	req.Query = query
-	req.From = yesterdayStartOfDay
-	req.PageSize = cfg.MaxPageSize
-
-	// Create and run downloader
-	downloader, err := newsapi.NewNewsDownloaderWithDefaults(cfg)
-	if err != nil {
-		return fmt.Errorf("failed to create downloader: %w", err)
-	}
-	defer downloader.Close()
-
-	_, err = downloader.DownloadAllNewsToFile(ctx, req)
-	return err
 }

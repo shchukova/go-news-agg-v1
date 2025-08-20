@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 )
 
 // Config holds all the application's configuration parameters
@@ -170,11 +171,16 @@ func (c *Config) SaveConfig(filePath string) error {
 
 // parseIntFromEnv is a helper function to parse integers from environment variables
 func parseIntFromEnv(value string) (int, error) {
-	// Simple integer parsing - in production, you might want to use strconv.Atoi
-	// and handle errors more gracefully
-	var result int
-	if _, err := fmt.Sscanf(value, "%d", &result); err != nil {
-		return 0, err
+	if value == "" {
+		return 0, fmt.Errorf("empty value")
 	}
+	
+	// Use strconv.Atoi for proper integer parsing
+	// This will reject floats like "42.5" and other invalid formats
+	result, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("invalid integer format: %w", err)
+	}
+	
 	return result, nil
 }

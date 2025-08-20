@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	"go-news-agg/config"
-	"go-news-agg/kafka_producer"
-	"go-news-agg/utils"
+	"go-news-agg/internal/config"
+	"go-news-agg/internal/kafka_producer"
+	"go-news-agg/pkg/utils"
 )
 
 // NewsDownloader handles downloading news articles from NewsAPI

@@ -681,7 +681,7 @@ func TestErrorChaining(t *testing.T) {
 	}
 
 	// Test error.Is() functionality
-	if !fmt.Errorf("wrapped: %w", fileErr).Error() != "" {
+	if fmt.Errorf("wrapped: %w", fileErr).Error() != "" {
 		// This tests that our errors work with error wrapping
 		wrappedErr := fmt.Errorf("wrapped: %w", fileErr)
 		if !strings.Contains(wrappedErr.Error(), "file operation") {
